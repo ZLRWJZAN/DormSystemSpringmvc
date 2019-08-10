@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ps.dorm.mapper.DormMapper">
+    <insert id="dormInsert" parameterType="com.ps.dorm.domain.DormDo">
+        insert into dorm (number,buiding_id) VALUES (${number},${buidingId})
+    </insert>
+
+    <select id="dormSelect" resultType="com.ps.dorm.domain.DormDo">
+        select * from dorm
+    </select>
+
+    <delete id="dormDelete" parameterType="com.ps.dorm.domain.DormDo">
+        delete from dorm where id=${id}
+    </delete>
+
+    <update id="dormUpdate" parameterType="com.ps.dorm.domain.DormDo">
+        update dorm set number=${number}
+        <where>
+            <if test="id!=null">
+                id=${id}
+            </if>
+        </where>
+    </update>
+
+    <select id="dormSelectPeople" resultType="com.ps.dorm.domain.DormDo" resultMap="selectPeople">
+        select buidName,number,current_people from dorm d left join building b on(b.id=d.buiding_id)
+    </select>
+    <resultMap type="com.ps.dorm.domain.DormDo" id="selectPeople">
+        <!-- property 表示com.mybatis.bean.StudentTemp中的属性； column 表示表中的列名 -->
+        <result property="currentPeople" column="current_people" />
+        <result property="number" column="number" />
+        <!-- association字面意思关联，这里只专门做一对一关联； property表示是com.mybatis.bean.StudentTemp中的属性名称；
+            javaType表示该属性是什么类型对象 -->
+        <association property="buidingDo" javaType="com.ps.dorm.domain.BuidingDo">
+            <!-- property 表示com.mybatis.bean.Class中的属性； column 表示表中的列名 -->
+            <result property="buidName" column="buidName" />
+        </association>
+    </resultMap>
+</mapper>

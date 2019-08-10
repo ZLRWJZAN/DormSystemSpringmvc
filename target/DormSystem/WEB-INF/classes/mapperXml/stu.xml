@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ps.dorm.mapper.StuMapper">
+
+    <!--<resultMap type="com.ps.dorm.domain.StudentDo" id="SelectDetail">
+        &lt;!&ndash; property 表示com.mybatis.bean.StudentTemp中的属性； column 表示表中的列名 &ndash;&gt;
+        <result property="stuName" column="stuName" />
+        <result property="love" column="love" />
+        &lt;!&ndash; association字面意思关联，这里只专门做一对一关联； property表示是com.mybatis.bean.StudentTemp中的属性名称；
+            javaType表示该属性是什么类型对象 &ndash;&gt;
+        <association property="dormDo" javaType="com.ps.dorm.domain.DormDo">
+            &lt;!&ndash; property 表示com.mybatis.bean.Class中的属性； column 表示表中的列名 &ndash;&gt;
+            <result property="number" column="number" />
+        </association>
+        <association property="buidingDo" javaType="com.ps.dorm.domain.BuidingDo">
+            &lt;!&ndash; property 表示com.mybatis.bean.Class中的属性； column 表示表中的列名 &ndash;&gt;
+            <result property="buidName" column="buidName" />
+            <result property="address" column="address" />
+        </association>
+    </resultMap>-->
+
+    <resultMap type="com.ps.dorm.domain.StudentDo" id="SelectDetail">
+        <!-- property 表示com.mybatis.bean.StudentTemp中的属性； column 表示表中的列名 -->
+        <result property="stuName" column="stuName" />
+        <result property="love" column="love" />
+
+        <result property="dormDo.number" column="number" />
+
+        <result property="buidingDo.buidName" column="buidName" />
+        <result property="buidingDo.address" column="address" />
+    </resultMap>
+
+
+
+    <insert id="stuInsert" parameterType="com.ps.dorm.domain.StudentDo">
+        insert into student (stuName,dorm_id,stuSex) VALUES ("${name}",${dormId},${sex})
+    </insert>
+
+    <select id="stuSelect" resultType="com.ps.dorm.domain.StudentDo">
+        select * from student
+    </select>
+
+    <delete id="stuDelete" parameterType="com.ps.dorm.domain.StudentDo">
+        delete from student where id=${id}
+    </delete>
+
+    <update id="stuUpdate" parameterType="com.ps.dorm.domain.StudentDo">
+        update student set stuName="${name}",dorm_id=${dormId},stuSex=${sex}
+        <where>
+            <if test="id!=null">
+                id=${id}
+            </if>
+        </where>
+    </update>
+
+    <select id="stuSelectDetail" resultMap="SelectDetail">
+        SELECT
+            buidName,
+            address,
+            number,
+            stuName,
+            love
+        FROM
+            student s
+            LEFT JOIN dorm d ON ( d.id = s.dorm_id )
+            LEFT JOIN building b ON ( b.id = d.buiding_id )
+    </select>
+
+    <select id="stuLoveCount" resultType="com.ps.dorm.domain.StudentDo">
+        /*select DISTINCT
+            SUBSTRING_INDEX(SUBSTRING_INDEX(s.love,',',b.help_topic_id+1),',',-1) as love
+            ,COUNT(stu.id) as count
+        from student s
+            join
+            mysql.help_topic b
+        on b.help_topic_id &lt;(length(s.love)-length(replace(s.love,',',''))+1)
+            join
+            student stu
+        on(s.love=stu.love)
+        GROUP BY love*/
+
+        SELECT DISTINCT
+        SUBSTRING_INDEX( SUBSTRING_INDEX( s.love, ',', b.help_topic_id + 1 ), ',',- 1 ) AS love,
+        COUNT( stu.id ) AS count
+        FROM
+        student s
+        JOIN mysql.help_topic b ON b.help_topic_id &lt;( length( s.love ) - length( REPLACE ( s.love, ',', '' ) ) + 1 )
+        JOIN student stu ON ( s.love = stu.love )
+        GROUP BY
+        love
+    </select>
+
+    <select id="stuLimit" resultType="com.ps.dorm.domain.StudentDo">
+        select * from student
+    </select>
+
+</mapper>
